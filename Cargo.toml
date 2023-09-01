@@ -13,3 +13,6 @@ repository = "https://github.com/Axlefublr/hash_finder"
 
 [dependencies]
 clap = { version = "4.4.1", features = ["derive"] }
+hex = "0.4.3"
+num_cpus = "1.16.0"
+ring = "0.16.20"
