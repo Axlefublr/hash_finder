@@ -4,6 +4,13 @@ use std::thread::{self, JoinHandle};
 
 use crate::MAX_ZEROS;
 
+/// Creates a hash using sha256, from your input string
+///
+/// # Arguments
+/// * `input` - the input string you want to get the hash of
+///
+/// # Returns
+/// The hash of the string you inputted
 fn create_sha256(input: String) -> String {
 	let mut context = Context::new(&SHA256);
 	context.update(input.as_bytes());
@@ -12,15 +19,20 @@ fn create_sha256(input: String) -> String {
 	hex::encode(digest.as_ref())
 }
 
-/// Uses multiple threads to find your amount of hashes that have your amount of trailing zeros. Prints them to stdout.
+/// Uses multiple threads to find your amount of hashes that have your amount of trailing zeros.
+/// Prints them to stdout.
 ///
 /// # Arguments
-/// * `zeros_count` - The amount of consecutive trailing zeros in the hashes
-/// * `max_results_count` - The amount of matching hashes to find and print
+/// * `zeros_count` - the amount of consecutive trailing zeros in the hashes
+/// * `max_results_count` - the amount of matching hashes to find and print
+///
+/// # Fails
+/// If zeros_count is bigger than 64.
+/// This is because the hash length is 64 symbols.
 ///
 /// # Usage
 /// ```
-/// let result = multithread_hashing(args.zeros_count, args.max_results_count);
+/// let result = multithread_hashing(zeros_count, max_results_count);
 /// match result {
 ///     Ok(()) => ExitCode::SUCCESS,
 ///     Err(message) => {
