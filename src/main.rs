@@ -5,7 +5,7 @@ use std::process::ExitCode;
 mod args;
 mod hash;
 
-const MAX_ZEROS: usize = 64;
+const HASH_LENGTH: usize = 64;
 
 fn main() -> ExitCode {
 	let args = Args::parse();

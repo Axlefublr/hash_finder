@@ -2,7 +2,7 @@ use ring::digest::{Context, SHA256};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
-use crate::MAX_ZEROS;
+use crate::HASH_LENGTH;
 
 /// Creates a hash using sha256, from your input string
 ///
@@ -42,7 +42,7 @@ fn create_sha256(input: String) -> String {
 /// }
 /// ```
 pub fn multithread_hashing(zeros_count: usize, max_results_count: u32) -> Result<(), &'static str> {
-	if zeros_count > MAX_ZEROS {
+	if zeros_count > HASH_LENGTH {
 		return Err("the hash string is 64 symbols long. it will never contain 65 trailing zeros");
 	}
 
@@ -63,6 +63,10 @@ pub fn multithread_hashing(zeros_count: usize, max_results_count: u32) -> Result
 	Ok(())
 }
 
+/// Spawns a thread that hashes the number of the passed counter.
+/// Every new thread increments the counter by one.
+/// Any time a thread matches the passed amount of trailing zeros, `found_hashes` gets incremented, and the hash gets printed to stdout, along with the hashed counter on the left.
+/// If we found `max_results_count` of hashes, the loop exits.
 fn spawn_thread(
 	counter: &Arc<Mutex<u32>>,
 	found_hashes: &Arc<Mutex<u32>>,
