@@ -51,28 +51,47 @@ pub fn multithread_hashing(zeros_count: usize, max_results_count: u32) -> Result
 	Ok(())
 }
 
-fn spawn_thread(counter: &Arc<Mutex<u32>>, found_hashes: &Arc<Mutex<u32>>, zeros_count: usize, max_results_count: u32) -> JoinHandle<()> {
+fn spawn_thread(
+	counter: &Arc<Mutex<u32>>,
+	found_hashes: &Arc<Mutex<u32>>,
+	zeros_count: usize,
+	max_results_count: u32,
+) -> JoinHandle<()> {
 	let counter = Arc::clone(counter);
 	let found_hashes = Arc::clone(found_hashes);
 	thread::spawn(move || loop {
-		let i = {
-			let mut num = counter.lock().unwrap();
-			let i = *num;
-			*num += 1;
-			i
+		let index = {
+			let mut index = counter.lock().unwrap();
+			let old_index = *index;
+			*index += 1;
+			old_index
 		};
 
-		let hash = create_sha256(format!("{}", i));
+		let hash = create_sha256(format!("{}", index));
 		if hash.ends_with(&"0".repeat(zeros_count)) {
 			{
 				let mut num = found_hashes.lock().unwrap();
 				*num += 1;
 			}
-			println!("{}, \"{}\"", i, hash);
+			println!("{}, \"{}\"", index, hash);
 		}
 
 		if *found_hashes.lock().unwrap() >= max_results_count {
 			break;
 		}
 	})
+}
+
+#[cfg(test)]
+mod tests {
+	use crate::hash::create_sha256;
+
+	#[test]
+	fn create_sha256_abc() {
+		let result = create_sha256("abc".to_string());
+		assert_eq!(
+			result,
+			"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+		);
+	}
 }

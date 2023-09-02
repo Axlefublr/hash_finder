@@ -1,6 +1,6 @@
-use std::process::ExitCode;
 use args::Args;
 use clap::Parser;
+use std::process::ExitCode;
 
 mod args;
 mod hash;
