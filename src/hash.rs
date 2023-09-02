@@ -4,6 +4,9 @@ use std::thread::{self, JoinHandle};
 
 use crate::HASH_LENGTH;
 
+#[cfg(test)]
+mod tests;
+
 /// Creates a hash using sha256, from your input string
 ///
 /// # Arguments
@@ -96,18 +99,4 @@ fn spawn_thread(
 			break;
 		}
 	})
-}
-
-#[cfg(test)]
-mod tests {
-	use crate::hash::create_sha256;
-
-	#[test]
-	fn create_sha256_abc() {
-		let result = create_sha256("abc".to_string());
-		assert_eq!(
-			result,
-			"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-		);
-	}
 }
