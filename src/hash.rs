@@ -15,11 +15,11 @@ mod tests;
 /// # Returns
 /// The hash of the string you inputted
 fn create_sha256(input: String) -> String {
-	let mut context = Context::new(&SHA256);
-	context.update(input.as_bytes());
-	let digest = context.finish();
+    let mut context = Context::new(&SHA256);
+    context.update(input.as_bytes());
+    let digest = context.finish();
 
-	hex::encode(digest.as_ref())
+    hex::encode(digest.as_ref())
 }
 
 /// Uses multiple threads to find your amount of hashes that have your amount of trailing zeros.
@@ -45,25 +45,25 @@ fn create_sha256(input: String) -> String {
 /// }
 /// ```
 pub fn multithread_hashing(zeros_count: usize, max_results_count: u32) -> Result<(), &'static str> {
-	if zeros_count > HASH_LENGTH {
-		return Err("the hash string is 64 symbols long. it will never contain 65 trailing zeros");
-	}
+    if zeros_count > HASH_LENGTH {
+        return Err("the hash string is 64 symbols long. it will never contain 65 trailing zeros");
+    }
 
-	let counter = Arc::new(Mutex::new(1));
-	let found_hashes = Arc::new(Mutex::new(0));
+    let counter = Arc::new(Mutex::new(1));
+    let found_hashes = Arc::new(Mutex::new(0));
 
-	let num_threads = num_cpus::get();
-	let mut handles = vec![];
+    let num_threads = num_cpus::get();
+    let mut handles = vec![];
 
-	for _ in 0..num_threads {
-		let handle = spawn_thread(&counter, &found_hashes, zeros_count, max_results_count);
-		handles.push(handle);
-	}
+    for _ in 0..num_threads {
+        let handle = spawn_thread(&counter, &found_hashes, zeros_count, max_results_count);
+        handles.push(handle);
+    }
 
-	for handle in handles {
-		handle.join().unwrap();
-	}
-	Ok(())
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    Ok(())
 }
 
 /// Spawns a thread that hashes the number of the passed counter.
@@ -71,32 +71,32 @@ pub fn multithread_hashing(zeros_count: usize, max_results_count: u32) -> Result
 /// Any time a thread matches the passed amount of trailing zeros, `found_hashes` gets incremented, and the hash gets printed to stdout, along with the hashed counter on the left.
 /// If we found `max_results_count` of hashes, the loop exits.
 fn spawn_thread(
-	counter: &Arc<Mutex<u32>>,
-	found_hashes: &Arc<Mutex<u32>>,
-	zeros_count: usize,
-	max_results_count: u32,
+    counter: &Arc<Mutex<u32>>,
+    found_hashes: &Arc<Mutex<u32>>,
+    zeros_count: usize,
+    max_results_count: u32,
 ) -> JoinHandle<()> {
-	let counter = Arc::clone(counter);
-	let found_hashes = Arc::clone(found_hashes);
-	thread::spawn(move || loop {
-		let index = {
-			let mut index = counter.lock().unwrap();
-			let old_index = *index;
-			*index += 1;
-			old_index
-		};
+    let counter = Arc::clone(counter);
+    let found_hashes = Arc::clone(found_hashes);
+    thread::spawn(move || loop {
+        let index = {
+            let mut index = counter.lock().unwrap();
+            let old_index = *index;
+            *index += 1;
+            old_index
+        };
 
-		let hash = create_sha256(format!("{}", index));
-		if hash.ends_with(&"0".repeat(zeros_count)) {
-			{
-				let mut num = found_hashes.lock().unwrap();
-				*num += 1;
-			}
-			println!("{}, \"{}\"", index, hash);
-		}
+        let hash = create_sha256(format!("{}", index));
+        if hash.ends_with(&"0".repeat(zeros_count)) {
+            {
+                let mut num = found_hashes.lock().unwrap();
+                *num += 1;
+            }
+            println!("{}, \"{}\"", index, hash);
+        }
 
-		if *found_hashes.lock().unwrap() >= max_results_count {
-			break;
-		}
-	})
+        if *found_hashes.lock().unwrap() >= max_results_count {
+            break;
+        }
+    })
 }
